@@ -1,0 +1,28 @@
+{
+  "name": "5-o-clock-back-end",
+  "version": "1.0.0",
+  "description": "**Have you ever been sitting at home and craving a cocktail, but don't know what to make? Come check out our site! It will allow users to enter a list of items they have in their home bar, either alcohol or mixers, and it will return a list of cocktails you can make using the indgredients you have on hand. The site will also allow users to sign in and save the list of items in their bar, as well as saving a list of favorite cocktails where they will be able to update cocktails if they want to make a change.**",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Team-Alpha-Code301/5-o-clock-back-end.git"
+  },
+  "author": "Brenda Jow, Ian Shirley, Dylan Cabral, Don Choi, Gordon P Reilley Jr",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Team-Alpha-Code301/5-o-clock-back-end/issues"
+  },
+  "homepage": "https://github.com/Team-Alpha-Code301/5-o-clock-back-end#readme",
+  "dependencies": {
+    "@auth0/auth0-react": "^1.12.0",
+    "axios": "^1.2.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-oauth2-jwt-bearer": "^1.2.0",
+    "mongoose": "^6.7.5",
+    "nodemon": "^2.0.20"
+  }
+}
