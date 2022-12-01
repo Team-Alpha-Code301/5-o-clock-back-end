@@ -5,7 +5,7 @@ const app = express();
 const axios = require('axios');
 
 app.use(cors());
-// app.use(express.json());
+app.use(express.json());
 
 
 //------connect to MongoDB------//
@@ -30,7 +30,7 @@ app.get('/test', (req, res) => {
   res.send('test request received');
 });
 
-app.get('/cocktails', getCocktails);
+app.get('/cocktails',getCocktails);
 
 
 
