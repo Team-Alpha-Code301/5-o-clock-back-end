@@ -3,20 +3,22 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const axios = require('axios');
+const Drink = require('./model/Drink');
+// const User = require('./model/User');
 
 app.use(cors());
 app.use(express.json());
 
 
 //------connect to MongoDB------//
-// const mongoose = require('mongoose');
-// mongoose.connect(process.env.DB_URL);
+const mongoose = require('mongoose');
+mongoose.connect(process.env.DB_URL);
 
-// const db = mongoose.connection;
-// db.on('error', console.error.bind(console, 'connection error:'));
-// db.once('open', function () {
-//   console.log('Mongoose is connected');
-// });
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function () {
+  console.log('Mongoose is connected');
+});
 
 
 const PORT = process.env.PORT || 3001;
@@ -80,6 +82,32 @@ class DrinkDetail {//this is from Ninja
     this.instruction = drink.instructions;
   }
 }
+
+
+
+//CRUD
+
+
+//create drink / ingredient ?
+app.post('/barcart',async (req, res)=>{
+  let result = await Drink.create(req.body);
+  res.send(result);
+} );
+
+
+//update ingredient?
+app.put('/barcart/:id', async (req, res)=>{
+  let drinkData = await Drink.findByIdAndUpdate(req.params.id, req.body);
+  res.send(drinkData);
+});
+
+
+//delete ingredient / drink?
+app.delete('/barcart/:id',async (req, res)=> {
+  let deleted = await Drink.findByIdAndDelete(req.params.id);
+  res.send('deleted');
+});
+
 
 
 
