@@ -48,13 +48,17 @@ async function getCocktails(req, res) {
 }
 
 async function displayCocktail(req, res) {
-  let id = req.query.id;
-  console.log(id);
-  let url = `https://www.thecocktaildb.com/api/json/v1/1/lookup.php?i=${id}`;
-  try {
-    let oneCocktail = await axios.get(url);
-    let displayAdrink = new DrinkDetail(oneCocktail.data);
-    res.send(displayAdrink);
+  let name = req.query.name;
+  try { //ninja getting name, ingredients,and instructions
+    let oneCocktail = await axios({
+      method:'GET',
+      url:`https://api.api-ninjas.com/v1/cocktail?name=${name}`,
+      headers: {
+        'X-Api-Key': process.env.NINJAS_KEY
+      }
+    });
+    let matchName = oneCocktail.data.find(obj => obj.name.includes(name.toLowerCase()));
+    res.send(new DrinkDetail(matchName));
   } catch (e) {
     res.send(e.error);
   }
@@ -71,14 +75,11 @@ class Drinks { //this is from cocktailDB
 
 class DrinkDetail {//this is from Ninja
   constructor(drink) {
-    this.id = drink.idDrink;
-    this.name = drink.strDrink;
-    this.src = drink.strDrinkThumb;
-    this.instruction =drink.strInstructions;
+    this.name = drink.name;
+    this.ingredients= drink.ingredients;
+    this.instruction = drink.instructions;
   }
 }
-
-
 
 
 
