@@ -30,22 +30,57 @@ app.get('/test', (req, res) => {
   res.send('test request received');
 });
 
-app.get('/cocktails',getCocktails);
+app.get('/getcocktails', getCocktails);
+app.get('/displaycocktail', displayCocktail);
 
 
-
-
-async function getCocktails(req, res){
-  let url = 'https://www.thecocktaildb.com/api/json/v1/1/filter.php?i=Gin';
+//get API data
+async function getCocktails(req, res) {
+  let url = `https://www.thecocktaildb.com/api/json/v1/1/filter.php?i=${req.query.i}`;
   try {
     let filteredList = await axios.get(url);
-    // reutrn a list of drinks name in array Obj
-    //let cleanUpData = filteredList.data.drinks[1].strDrink;
-    console.log(filteredList.data);
-    res.send(filteredList.data);
+    let drinkList = filteredList.data.drinks.map(obj => new Drinks(obj));
+    let displayDrinks = drinkList.slice(0, 20);
+    res.send(displayDrinks);
   } catch (e) {
-    res.send('error');
+    res.send(e.error);
   }
 }
+
+async function displayCocktail(req, res) {
+  let id = req.query.id;
+  console.log(id);
+  let url = `https://www.thecocktaildb.com/api/json/v1/1/lookup.php?i=${id}`;
+  try {
+    let oneCocktail = await axios.get(url);
+    let displayAdrink = new DrinkDetail(oneCocktail.data);
+    res.send(displayAdrink);
+  } catch (e) {
+    res.send(e.error);
+  }
+}
+
+
+class Drinks { //this is from cocktailDB
+  constructor(drink) {
+    this.id = drink.idDrink;
+    this.name = drink.strDrink;
+    this.src = drink.strDrinkThumb;
+  }
+}
+
+class DrinkDetail {//this is from Ninja
+  constructor(drink) {
+    this.id = drink.idDrink;
+    this.name = drink.strDrink;
+    this.src = drink.strDrinkThumb;
+    this.instruction =drink.strInstructions;
+  }
+}
+
+
+
+
+
 
 app.listen(PORT, () => console.log(`listening on ${PORT}`));
