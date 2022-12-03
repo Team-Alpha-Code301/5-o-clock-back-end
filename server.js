@@ -12,6 +12,7 @@ app.use(express.json());
 
 //------connect to MongoDB------//
 const mongoose = require('mongoose');
+const User = require('./model/User');
 mongoose.connect(process.env.DB_URL);
 
 const db = mongoose.connection;
@@ -88,24 +89,36 @@ class DrinkDetail {//this is from Ninja
 //CRUD
 
 
-//create drink / ingredient ?
-app.post('/barcart',async (req, res)=>{
-  let result = await Drink.create(req.body);
-  res.send(result);
+// / add new user document/object into mongoDB upon first login
+// app.post('/users', newUser);
+app.post('/users',async (req, res)=>{
+  let newUser = await User.create(req.body);
+  res.send(newUser);
 } );
 
+// // pull user's info when they login after the first time
+// app.get('/users/:email', getUserByEmail);
+app.get('/users/:email', async (req,res) =>{
 
-//update ingredient?
+  let url = `${process.env.DB_URL}/users/${req.body}`;
+  let getUserByEmail = await User.get(url);
+  res.send(getUserByEmail);
+});
+
+
+// // update user when they add/delete items from bar cart
+// app.put('/users/:email', updateUser);
 app.put('/barcart/:id', async (req, res)=>{
-  let drinkData = await Drink.findByIdAndUpdate(req.params.id, req.body);
+  let drinkData = await User.findByIdAndUpdate(req.params.id, req.body);
   res.send(drinkData);
 });
 
 
-//delete ingredient / drink?
+// // if necessary, delete user
+// // app.delete('/users/:email', deleteUser);
 app.delete('/barcart/:id',async (req, res)=> {
-  let deleted = await Drink.findByIdAndDelete(req.params.id);
-  res.send('deleted');
+  let deleted = await User.findByIdAndDelete(req.params.id);
+  res.send(deleted);
 });
 
 
