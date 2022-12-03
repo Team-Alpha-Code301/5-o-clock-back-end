@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const axios = require('axios');
-const Drink = require('./model/Drink');
+const User = require('./model/User');
 // const User = require('./model/User');
 
 app.use(cors());
@@ -12,7 +12,6 @@ app.use(express.json());
 
 //------connect to MongoDB------//
 const mongoose = require('mongoose');
-const User = require('./model/User');
 mongoose.connect(process.env.DB_URL);
 
 const db = mongoose.connection;
@@ -54,8 +53,8 @@ async function displayCocktail(req, res) {
   let name = req.query.name;
   try { //ninja getting name, ingredients,and instructions
     let oneCocktail = await axios({
-      method:'GET',
-      url:`https://api.api-ninjas.com/v1/cocktail?name=${name}`,
+      method: 'GET',
+      url: `https://api.api-ninjas.com/v1/cocktail?name=${name}`,
       headers: {
         'X-Api-Key': process.env.NINJAS_KEY
       }
@@ -66,7 +65,6 @@ async function displayCocktail(req, res) {
     res.send(e.error);
   }
 }
-
 
 class Drinks { //this is from cocktailDB
   constructor(drink) {
@@ -79,7 +77,7 @@ class Drinks { //this is from cocktailDB
 class DrinkDetail {//this is from Ninja
   constructor(drink) {
     this.name = drink.name;
-    this.ingredients= drink.ingredients;
+    this.ingredients = drink.ingredients;
     this.instruction = drink.instructions;
   }
 }
@@ -91,35 +89,55 @@ class DrinkDetail {//this is from Ninja
 
 // / add new user document/object into mongoDB upon first login
 // app.post('/users', newUser);
-app.post('/users',async (req, res)=>{
+app.post('/users', async (req, res) => {
   let newUser = await User.create(req.body);
   res.send(newUser);
-} );
+});
 
 // // pull user's info when they login after the first time
 // app.get('/users/:email', getUserByEmail);
-app.get('/users/:email', async (req,res) =>{
+app.get('/users/:email', getUserData);
 
-  let url = `${process.env.DB_URL}/users/${req.body}`;
-  let getUserByEmail = await User.get(url);
-  res.send(getUserByEmail);
-});
+async function getUserData(req, res) {
+  try {
+    let userEmail = req.params.email;
+    let getUserByEmail = await User.findOne({ email: userEmail });
+    res.send(getUserByEmail);
+  } catch (e) {
+    res.send('no data found').status(500);
+  }
+}
+//638aa41cdb5f5552e19bba57
 
 
-// // update user when they add/delete items from bar cart
+// update user when they add/delete items from bar cart
 // app.put('/users/:email', updateUser);
-app.put('/barcart/:id', async (req, res)=>{
-  let drinkData = await User.findByIdAndUpdate(req.params.id, req.body);
-  res.send(drinkData);
+app.put('/users/:email', async (req, res) => {
+  try {
+    let updatedData = await User.findOneAndUpdate({email:req.params.email}, {$push:req.body});
+    // getUserData(req.params.email)
+    res.send(updatedData);
+  } catch (e) {
+    res.send(e.message).status(500);
+  }
 });
 
-
+app.patch('/users/:email', async (req, res) => {
+  try {
+    let updatedData = await User.findOneAndUpdate({email:req.params.email}, {$pull:req.body});
+    // getUserData(req.params.email)
+    res.send(updatedData);
+  } catch (e) {
+    res.send(e.message).status(500);
+  }
+});
 // // if necessary, delete user
 // // app.delete('/users/:email', deleteUser);
-app.delete('/barcart/:id',async (req, res)=> {
-  let deleted = await User.findByIdAndDelete(req.params.id);
-  res.send(deleted);
+app.delete('/users/:email', async (req, res) => {
+  let deleted = await User.findOneAndDelete(req.params.email);
+  res.send('deleted' + deleted);
 });
+
 
 
 
