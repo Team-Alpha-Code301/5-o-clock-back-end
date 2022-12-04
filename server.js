@@ -50,22 +50,35 @@ async function getCocktails(req, res) {
   });
 }
 
+//get the instruction
+//first, loop over the ingredients, // if it's not null , get the measurement, push into array
+//(oneCocktail.data.drinks[0].strMeasure[i] !== null) ? oneCocktail.data.drinks[0].strMeasure[i] : '' ;
+
 async function displayCocktail(req, res) {
   let name = req.query.name;
-  try { //ninja getting name, ingredients,and instructions
-    let oneCocktail = await axios({
-      method: 'GET',
-      url: `https://api.api-ninjas.com/v1/cocktail?name=${name}`,
-      headers: {
-        'X-Api-Key': process.env.NINJAS_KEY
+  try {
+    let oneCocktail = await axios(`https://www.thecocktaildb.com/api/json/v1/1/search.php?s=${name}`);
+    let cleanUpData = [];
+    console.log(oneCocktail.data.drinks[0].strIngredient1);
+    for (let i = 1; i <= 15; i++) {
+      if (oneCocktail.data.drinks[0][`strIngredient${i}`] !== null) {
+        cleanUpData.push((oneCocktail.data.drinks[0][`strMeasure${i}`] !== null) ? (oneCocktail.data.drinks[0][`strMeasure${i}`] + oneCocktail.data.drinks[0][`strIngredient${i}`]): oneCocktail.data.drinks[0][`strIngredient${i}`]);
       }
-    });
-    let matchName = oneCocktail.data.find(obj => obj.name.includes(name.toLowerCase()));
-    res.send(new DrinkDetail(matchName));
+    }
+    let newDrink = {
+      name: name,
+      ingredients: cleanUpData,
+      instruction: oneCocktail.data.drinks[0]['strInstructions'],
+    };
+    let result = new DrinkDetail(newDrink);
+    res.send(result);
+    // let matchName = oneCocktail.data.find(obj => obj.name.includes(name.toLowerCase()));
   } catch (e) {
     res.send(e.error);
   }
 }
+
+
 
 class Drinks { //this is from cocktailDB
   constructor(drink) {
@@ -75,11 +88,11 @@ class Drinks { //this is from cocktailDB
   }
 }
 
-class DrinkDetail {//this is from Ninja
+class DrinkDetail {
   constructor(drink) {
-    this.name = drink.name;
-    this.ingredients = drink.ingredients;
-    this.instruction = drink.instructions;
+    this.name = drink.name; //x
+    this.ingredients = drink.ingredients; //O
+    this.instruction = drink.instruction; //x
   }
 }
 
