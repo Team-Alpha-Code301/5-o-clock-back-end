@@ -10,7 +10,6 @@ app.use(cors());
 app.use(express.json());
 const verifyUser = require('./auth');
 
-
 //------connect to MongoDB------//
 const mongoose = require('mongoose');
 mongoose.connect(process.env.DB_URL);
@@ -20,7 +19,6 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () {
   console.log('Mongoose is connected');
 });
-
 
 const PORT = process.env.PORT || 3001;
 
@@ -87,7 +85,6 @@ class DrinkDetail {//this is from Ninja
 
 //CRUD
 
-
 // / add new user document/object into mongoDB upon first login
 // app.post('/users', newUser);
 app.post('/users', async (req, res) => {
@@ -102,8 +99,18 @@ app.post('/users', async (req, res) => {
   });
 });
 
-// // pull user's info when they login after the first time
-// app.get('/users/:email', getUserByEmail);
+// get info for all users (for testing purposes)
+app.get('/users', getAllUsersData);
+
+async function getAllUsersData(req, res) {
+  try {
+    let getUsers = await User.find();
+    res.send(getUsers);
+  } catch (e) {
+    res.send('no data found').status(500);
+  }
+}
+
 app.get('/users/:email', getUserData);
 
 async function getUserData(req, res) {
@@ -122,9 +129,6 @@ async function getUserData(req, res) {
     }
   });
 }
-
-
-
 
 // update user when they add/delete items from bar cart
 // app.put('/users/:email', updateUser);
@@ -160,8 +164,9 @@ app.patch('/users/:email', async (req, res) => {
       }
     }
   });
+
 });
-// // if necessary, delete user
+// // if necessary, delete user's bar cart from MongoDB
 // // app.delete('/users/:email', deleteUser);
 app.delete('/users/:email', async (req, res) => {
   verifyUser(req, async (err, user) => {
@@ -169,11 +174,10 @@ app.delete('/users/:email', async (req, res) => {
       console.log(err);
       res.send('invalid token');
     } else {
-      let deleted = await User.findOneAndDelete(req.params.email);
+      let deleted = await User.findOneAndDelete({email: req.params.email});
       res.send('deleted' + deleted);
     }
   });
 });
-
 
 app.listen(PORT, () => console.log(`listening on ${PORT}`));
