@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Team-Alpha-Code301/5-o-clock-back-end#readme",
   "dependencies": {
+    "@auth0/auth0-react": "^1.12.0",
     "axios": "^1.1.3",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
