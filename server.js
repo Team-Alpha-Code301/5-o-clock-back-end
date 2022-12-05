@@ -62,7 +62,7 @@ async function displayCocktail(req, res) {
     console.log(oneCocktail.data.drinks[0].strIngredient1);
     for (let i = 1; i <= 15; i++) {
       if (oneCocktail.data.drinks[0][`strIngredient${i}`] !== null) {
-        cleanUpData.push((oneCocktail.data.drinks[0][`strMeasure${i}`] !== null) ? (oneCocktail.data.drinks[0][`strMeasure${i}`] + oneCocktail.data.drinks[0][`strIngredient${i}`]): oneCocktail.data.drinks[0][`strIngredient${i}`]);
+        cleanUpData.push((oneCocktail.data.drinks[0][`strMeasure${i}`] !== null) ? (oneCocktail.data.drinks[0][`strMeasure${i}`] + oneCocktail.data.drinks[0][`strIngredient${i}`]) : oneCocktail.data.drinks[0][`strIngredient${i}`]);
       }
     }
     let newDrink = {
@@ -72,7 +72,6 @@ async function displayCocktail(req, res) {
     };
     let result = new DrinkDetail(newDrink);
     res.send(result);
-    // let matchName = oneCocktail.data.find(obj => obj.name.includes(name.toLowerCase()));
   } catch (e) {
     res.send(e.error);
   }
@@ -90,9 +89,9 @@ class Drinks { //this is from cocktailDB
 
 class DrinkDetail {
   constructor(drink) {
-    this.name = drink.name; //x
-    this.ingredients = drink.ingredients; //O
-    this.instruction = drink.instruction; //x
+    this.name = drink.name;
+    this.ingredients = drink.ingredients;//array
+    this.instruction = drink.instruction;
   }
 }
 
@@ -140,7 +139,8 @@ async function getUserData(req, res) {
         res.send('no data found').status(500);
       }
     }
-  });
+  }
+  );
 }
 
 // update user when they add/delete items from bar cart
@@ -152,8 +152,16 @@ app.put('/users/:email', async (req, res) => {
       res.send('invalid token');
     } else {
       try {
-        let updatedData = await User.findOneAndUpdate({ email: req.params.email }, { $push: req.body });
-        // getUserData(req.params.email)
+        let updatedData;
+        //If barCartItems is a string, meaning it is a new input, 
+        //... push it to existing data.
+        //If barCartItems is an array, meaning the user delete one of existing ingredients inside the array,
+        //... update to the database.
+        if(typeof req.body.barCartItems === "string"){
+          updatedData = await User.findOneAndUpdate({ email: req.params.email }, { $push : {barCartItems: req.body.barCartItems}});
+        }else if (Array.isArray(req.body.barCartItems)){
+          updatedData = await User.findOneAndUpdate({ email: req.params.email }, {barCartItems: req.body.barCartItems});
+        }
         res.send(updatedData);
       } catch (e) {
         res.send(e.message).status(500);
@@ -162,35 +170,37 @@ app.put('/users/:email', async (req, res) => {
   });
 });
 
-app.patch('/users/:email', async (req, res) => {
-  verifyUser(req, async (err, user) => {
-    if (err) {
-      console.log(err);
-      res.send('invalid token');
-    } else {
-      try {
-        let updatedData = await User.findOneAndUpdate({ email: req.params.email }, { $pull: req.body });
-        // getUserData(req.params.email)
-        res.send(updatedData);
-      } catch (e) {
-        res.send(e.message).status(500);
-      }
-    }
-  });
+// app.patch('/users/:email', async (req, res) => {
+//   verifyUser(req, async (err, user) => {
+//     if (err) {
+//       console.log(err);
+//       res.send('invalid token');
+//     } else {
+//       try {
+//         let updatedData = await User.findOneAndUpdate({ email: req.params.email }, {barCartItems: req.body.barCartItems});
+//         // getUserData(req.params.email)
+//         res.send(updatedData);
+//       } catch (e) {
+//         res.send(e.message).status(500);
+//       }
+//     }
+//   });
+// });
 
-});
-// // if necessary, delete user's bar cart from MongoDB
-// // app.delete('/users/:email', deleteUser);
-app.delete('/users/:email', async (req, res) => {
-  verifyUser(req, async (err, user) => {
-    if (err) {
-      console.log(err);
-      res.send('invalid token');
-    } else {
-      let deleted = await User.findOneAndDelete({email: req.params.email});
-      res.send('deleted' + deleted);
-    }
-  });
-});
+
+// if necessary, delete user's bar cart from MongoDB
+// app.delete('/users/:email', deleteUser);
+// app.delete('/users/:email', async (req, res) => {
+//   verifyUser(req, async (err, user) => {
+//     if (err) {
+//       console.log(err);
+//       res.send('invalid token');
+//     } else {
+//       let deleted = await User.findOneAndDelete({ email: req.params.email });
+//       res.send('deleted' + deleted);
+//     }
+//   });
+// });
+
 
 app.listen(PORT, () => console.log(`listening on ${PORT}`));
