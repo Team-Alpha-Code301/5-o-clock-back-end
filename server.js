@@ -190,17 +190,17 @@ app.put('/users/:email', async (req, res) => {
 
 // if necessary, delete user's bar cart from MongoDB
 // app.delete('/users/:email', deleteUser);
-// app.delete('/users/:email', async (req, res) => {
-//   verifyUser(req, async (err, user) => {
-//     if (err) {
-//       console.log(err);
-//       res.send('invalid token');
-//     } else {
-//       let deleted = await User.findOneAndDelete({ email: req.params.email });
-//       res.send('deleted' + deleted);
-//     }
-//   });
-// });
+app.delete('/users/:email', async (req, res) => {
+  verifyUser(req, async (err, user) => {
+    if (err) {
+      console.log(err);
+      res.send('invalid token');
+    } else {
+      let deleted = await User.findOneAndDelete({ email: req.params.email });
+      res.send('deleted' + deleted);
+    }
+  });
+});
 
 
 app.listen(PORT, () => console.log(`listening on ${PORT}`));
